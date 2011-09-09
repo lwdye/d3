@@ -1,6 +1,5 @@
 d3.chart.scatter = function() {
-  var width = 1,
-      height = 1,
+  var size = [1, 1],
       duration = 0,
       domain = null,
       tickFormat = null,
@@ -18,8 +17,8 @@ d3.chart.scatter = function() {
           dy = y.call(this, d, i),
           xd = domain && domain.call(this, d, i) || [d3.min(dx), d3.max(dx)], // new x-domain
           yd = domain && domain.call(this, d, i) || [d3.min(dy), d3.max(dy)], // new y-domain
-          x1 = d3.scale.linear().domain(xd).range([0, width]), // new x-scale
-          y1 = d3.scale.linear().domain(yd).range([height, 0]), // new y-scale
+          x1 = d3.scale.linear().domain(xd).range([0, size[0]]), // new x-scale
+          y1 = d3.scale.linear().domain(yd).range([size[1], 0]), // new y-scale
           x0 = this.__chart__ && this.__chart__.x || x1, // old x-scale
           y0 = this.__chart__ && this.__chart__.y || y1; // old y-scale
 
@@ -48,19 +47,16 @@ d3.chart.scatter = function() {
           .style("opacity", 1e-6)
         .transition()
           .duration(duration)
-          .delay(function(d) { return x0(d) * 5; })
           .attr("transform", t)
           .style("opacity", 1);
 
       datum.transition()
           .duration(duration)
-          .delay(function(d) { return x1(d) * 5; })
           .attr("transform", t)
           .style("opacity", 1);
 
       datum.exit().transition()
           .duration(duration)
-          .delay(function(d) { return x1(d) * 5; })
           .attr("transform", t)
           .style("opacity", 1e-6)
           .remove();
@@ -69,15 +65,9 @@ d3.chart.scatter = function() {
     });
   }
 
-  scatter.width = function(x) {
-    if (!arguments.length) return width;
-    width = x;
-    return scatter;
-  };
-
-  scatter.height = function(x) {
-    if (!arguments.length) return height;
-    height = x;
+  scatter.size = function(x) {
+    if (!arguments.length) return size;
+    size = x;
     return scatter;
   };
 
