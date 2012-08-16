@@ -43,7 +43,7 @@ d3.format = function(specifier) {
 
   var zcomma = zfill && comma;
 
-  return function(value) {
+  function format(value) {
 
     // Return the empty string for floats formatted as ints.
     if (integer && (value % 1)) return "";
@@ -73,7 +73,20 @@ d3.format = function(specifier) {
           : align === "^" ? padding.substring(0, length >>= 1)
             + negative + value + padding.substring(length)
           : negative + (zcomma ? value : padding + value)) + suffix;
+  }
+
+  format.parse = function(d) {
+    var value = d;
+    if (scale < 0) {
+      var prefix = d3_formatPrefixIndex.get(value.substring(value.length - 1));
+      value = prefix ? prefix(+value.substring(0, value.length - 1)) : +value;
+    } else {
+      value = +value / scale;
+    }
+    return value;
   };
+
+  return format;
 };
 
 // [[fill]align][sign][#][0][width][,][.precision][type]

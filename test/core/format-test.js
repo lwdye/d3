@@ -317,6 +317,22 @@ suite.addBatch({
       assert.strictEqual(f(-42), "-42");
       assert.strictEqual(f(-4200000), "-4,200,000");
       assert.strictEqual(f(-42000000), "-42,000,000");
+    },
+    "parse": {
+      "can parse SI prefixes": function(format) {
+        var parse = format("s").parse;
+        assert.strictEqual(parse("0.00"), 0);
+        assert.strictEqual(parse("1.00"), 1);
+        assert.strictEqual(parse("10.0"), 10);
+        assert.strictEqual(parse("100"), 100);
+        assert.strictEqual(parse("1.00k"), 1e3);
+        assert.strictEqual(parse("1.50k"), 1.5e3);
+        assert.strictEqual(parse("1.00M"), 1e6);
+        assert.strictEqual(parse("146M"), 146e6);
+        assert.strictEqual(parse("100Y"), 1e26);
+        assert.strictEqual(parse("1.00μ"), 1e-6);
+        assert.strictEqual(parse("0.0100"), .01);
+      }
     }
   }
 });

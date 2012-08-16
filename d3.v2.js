@@ -564,7 +564,7 @@
     if (type == "r" && !precision) type = "g";
     type = d3_format_types.get(type) || d3_format_typeDefault;
     var zcomma = zfill && comma;
-    return function(value) {
+    function format(value) {
       if (integer && value % 1) return "";
       var negative = value < 0 || value === 0 && 1 / value < 0 ? (value = -value, "-") : sign;
       if (scale < 0) {
@@ -580,7 +580,18 @@
       if (zcomma) value = d3_format_group(padding + value);
       negative += basePrefix;
       return (align === "<" ? negative + value + padding : align === ">" ? padding + negative + value : align === "^" ? padding.substring(0, length >>= 1) + negative + value + padding.substring(length) : negative + (zcomma ? value : padding + value)) + suffix;
+    }
+    format.parse = function(d) {
+      var value = d;
+      if (scale < 0) {
+        var prefix = d3_formatPrefixIndex.get(value.substring(value.length - 1));
+        value = prefix ? prefix(+value.substring(0, value.length - 1)) : +value;
+      } else {
+        value = +value / scale;
+      }
+      return value;
     };
+    return format;
   };
   var d3_format_re = /(?:([^{])?([<>=^]))?([+\- ])?(#)?(0)?([0-9]+)?(,)?(\.[0-9]+)?([a-zA-Z%])?/;
   var d3_format_types = d3.map({
@@ -623,7 +634,7 @@
     while (i > 0) t.push(value.substring(i -= 3, i + 3));
     return t.reverse().join(",") + f;
   }
-  var d3_formatPrefixes = [ "y", "z", "a", "f", "p", "n", "μ", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y" ].map(d3_formatPrefix);
+  var d3_formatPrefixIndex = new d3_Map, d3_formatPrefixes = [ "y", "z", "a", "f", "p", "n", "μ", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y" ].map(d3_formatPrefix);
   d3.formatPrefix = function(value, precision) {
     var i = 0;
     if (value) {
@@ -637,13 +648,15 @@
   function d3_formatPrefix(d, i) {
     var k = Math.pow(10, Math.abs(8 - i) * 3);
     return {
-      scale: i > 8 ? function(d) {
-        return d / k;
-      } : function(d) {
-        return d * k;
-      },
+      scale: i > 8 ? (d3_formatPrefixIndex.set(d, g), f) : (d3_formatPrefixIndex.set(d, f), g),
       symbol: d
     };
+    function f(d) {
+      return d / k;
+    }
+    function g(d) {
+      return d * k;
+    }
   }
   var d3_ease_quad = d3_ease_poly(2), d3_ease_cubic = d3_ease_poly(3), d3_ease_default = function() {
     return d3_ease_identity;
